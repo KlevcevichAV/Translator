@@ -4,35 +4,24 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Stream;
 
 public class Parser {
-    //    https://www.culture.ru/literature/poems?query=зимнее+утро
-    // Literature of modern times gold silver
-//    private final String SOURCE = "https://obrazovaka.ru/analiz-stihotvoreniya";
     private Document document;
+    private Elements elements;
 
 
-    public Verse parse(String title, String author) {
+    public Verse parse(String title, String author) throws Exception {
         Verse verse = new Verse(title, author);
+        setInfoFromFirstResource(verse);
         try {
-            setInfoFromFirstResource(verse);
+            setInfoFromSecondResource(verse);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-//        try {
-//            document = Jsoup.connect(SOURCE).userAgent("Chrome/4.0.249.0 Safari/532.5").referrer("http://www.google.com").get();
-//            try {
-//                String linkVerse = searchVerseInSecondSource(verse, author);
-//                document = Jsoup.connect(linkVerse).userAgent("Chrome/4.0.249.0 Safari/532.5").referrer("http://www.google.com").get();
-//                Elements listVerses = document.select("div#entity-cards entity-cards__spacing__reset grid-1-noSpaceTop_notebook-3_tablet-small-2_mobile-medium-1");
-//            } catch (Exception e) {
-//
-//            }
-//
-//        } catch (IOException e) {
-//
-//        }
         return verse;
     }
 
@@ -77,13 +66,61 @@ public class Parser {
         }
     }
 
-//    private String searchVerseInSecondSource(String verse, String author) throws Exception {
-//        Elements listVerses = document.select("div#content-main.full-width");
-//        for (Element element : listVerses.select("a")) {
-//            if (element.text().contains(verse) && element.text().contains(author)) {
-//                return element.attr("abs:href");
-//            }
-//        }
-//        throw new Exception("Verse not found!");
-//    }
+    private void setInfoFromSecondResource(Verse verse) throws Exception {
+        String source = "https://obrazovaka.ru/analiz-stihotvoreniya";
+        document = Jsoup.connect(source).userAgent("Chrome/4.0.249.0 Safari/532.5").referrer("http://www.google.com").get();
+        String linkVerse = searchVerseInSecondSource(verse);
+        document = Jsoup.connect(linkVerse).userAgent("Chrome/4.0.249.0 Safari/532.5").referrer("http://www.google.com").get();
+        elements = document.select("div.kratkiy-analiz");
+        setFoot(verse);
+        setTropes(verse);
+        System.out.println(verse.getFoot());
+    }
+
+    private String searchVerseInSecondSource(Verse verse) throws Exception {
+        Elements listVerses = document.select("div#content-main.full-width");
+        for (Element element : listVerses.select("a")) {
+            if (element.text().contains(verse.getTitle()) && element.text().contains(verse.getAuthor())) {
+                return element.attr("abs:href");
+            }
+        }
+        throw new Exception("Verse not found!");
+    }
+
+    private void setFoot(Verse verse) {
+        List<String> foots = Arrays.asList("ямб", "хорей", "амфибрахий", "анапест", "дактиль", "четырехсложный размер", "пятисложный размер", "акцентный размер");
+        Elements analise = elements.select("p");
+        for (Element element : analise) {
+            if (element.text().contains("Стихотворный размер")) {
+                for (String foot : foots) {
+                    if (element.text().contains(foot)) {
+                        verse.setFoot(foot);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    private void setTropes(Verse verse) {
+        List<String> tropes = Arrays.asList("литот", "метафор", "эпитет", "параллелизм", "аллегори", "ирони", "сравнени", "олицетворени", "гипербол", "перифраз", "оксюморон", "лексический повтор", "синтаксический параллелизм", "инверси", "пафос", "эвфемизм", "синекдоха", "дисфемизм", "метоними", "сарказм", "каламбур");
+        Elements analise = elements.select("p");
+        for (Element element : analise) {
+
+            for (String trope : tropes) {
+                if (element.text().toLowerCase(Locale.ROOT).contains(trope)) {
+//                        System.out.println(element.text());
+                    System.out.println(trope);
+                    Arrays.stream(Stream.of(element.text().split("–")).skip(1)
+                            .flatMap((p) -> Arrays.stream(p.split(","))).toArray(String[]::new))
+                            .map(p -> p.replaceAll("\\.", ""))
+                            .map(p -> p.replaceAll("”", ""))
+                            .map(p -> p.replaceAll(" “", ""))
+                            .forEach(el -> verse.getTropes().put(el, trope));
+                }
+            }
+
+        }
+        System.out.println(verse.getTropes());
+    }
 }

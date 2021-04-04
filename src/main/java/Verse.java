@@ -1,16 +1,18 @@
+import java.util.HashMap;
+
 public class Verse {
     private String author;
     private String verse;
     private String title;
     private int date;
-    private String century;
-    private String literatureProblem;
     private String foot;
+    private HashMap<String, String> tropes;
 
 
     public Verse(String title, String author) {
         this.author = author;
         this.title = title;
+        tropes = new HashMap<>();
     }
 
     public String getAuthor() {
@@ -45,23 +47,6 @@ public class Verse {
         this.date = date;
     }
 
-    public String getCentury() {
-        return century;
-    }
-
-    public void setCentury(String century) {
-        this.century = century;
-    }
-
-
-    public String getLiteratureProblem() {
-        return literatureProblem;
-    }
-
-    public void setLiteratureProblem(String literatureProblem) {
-        this.literatureProblem = literatureProblem;
-    }
-
     public String getFoot() {
         return foot;
     }
@@ -70,5 +55,23 @@ public class Verse {
         this.foot = foot;
     }
 
-    
+    public HashMap<String, String> getTropes() {
+        return tropes;
+    }
+
+    public void setTropes(HashMap<String, String> tropes) {
+        this.tropes = tropes;
+    }
+
+    @Override
+    public String toString() {
+        return "Verse{" +
+                "author='" + author + '\'' +
+                ", verse='" + verse + '\'' +
+                ", title='" + title + '\'' +
+                ", date=" + date +
+                ", foot='" + foot + '\'' +
+                ", tropes=" + tropes +
+                '}';
+    }
 }

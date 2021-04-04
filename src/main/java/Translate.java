@@ -10,7 +10,7 @@ import java.util.Locale;
 
 public class Translate {
 
-    public String translate(String text) throws IOException {
+    public static String translate(String text) throws IOException {
         String urlStr = String.format("https://context.reverso.net/translation/russian-english/%s", URLEncoder.encode(text, StandardCharsets.UTF_8));
         Document document = Jsoup.connect(urlStr).userAgent("Chrome/4.0.249.0 Safari/532.5").referrer("http://www.google.com").get();
         Elements listVerses = document.select("div.translation.ltr.dict.first.n");
