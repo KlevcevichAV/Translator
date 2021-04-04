@@ -4,6 +4,8 @@ public class Verse {
     private String title;
     private int date;
     private String century;
+    private String literatureProblem;
+    private String foot;
 
 
     public Verse(String title, String author) {
@@ -50,4 +52,23 @@ public class Verse {
     public void setCentury(String century) {
         this.century = century;
     }
+
+
+    public String getLiteratureProblem() {
+        return literatureProblem;
+    }
+
+    public void setLiteratureProblem(String literatureProblem) {
+        this.literatureProblem = literatureProblem;
+    }
+
+    public String getFoot() {
+        return foot;
+    }
+
+    public void setFoot(String foot) {
+        this.foot = foot;
+    }
+
+    
 }
