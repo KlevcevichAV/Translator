@@ -1,3 +1,5 @@
+package entity;
+
 import java.util.HashMap;
 
 public class Verse {
@@ -65,7 +67,7 @@ public class Verse {
 
     @Override
     public String toString() {
-        return "Verse{" +
+        return "entity.Verse{" +
                 "author='" + author + '\'' +
                 ", verse='" + verse + '\'' +
                 ", title='" + title + '\'' +

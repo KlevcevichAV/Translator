@@ -1,3 +1,6 @@
+package parser;
+
+import entity.Verse;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -42,7 +45,7 @@ public class Parser {
                 return element.select("a.card-heading_title-link").attr("href");
             }
         }
-        throw new Exception("Verse not found!");
+        throw new Exception("entity.Verse not found!");
     }
 
     private void setVerse(String source, Verse verse) throws IOException {
@@ -50,9 +53,8 @@ public class Parser {
         Elements listVerses = document.select("div.content-columns_block");
         StringBuilder builder = new StringBuilder();
         for (Element element : listVerses.select("p")) {
-            builder.append(element.text());
+            builder.append(element);
         }
-        System.out.println(builder.toString());
         verse.setVerse(builder.toString());
     }
 
@@ -84,7 +86,7 @@ public class Parser {
                 return element.attr("abs:href");
             }
         }
-        throw new Exception("Verse not found!");
+        throw new Exception("entity.Verse not found!");
     }
 
     private void setFoot(Verse verse) {
@@ -103,12 +105,12 @@ public class Parser {
     }
 
     private void setTropes(Verse verse) {
-        List<String> tropes = Arrays.asList("литот", "метафор", "эпитет", "параллелизм", "аллегори", "ирони", "сравнени", "олицетворени", "гипербол", "перифраз", "оксюморон", "лексический повтор", "синтаксический параллелизм", "инверси", "пафос", "эвфемизм", "синекдоха", "дисфемизм", "метоними", "сарказм", "каламбур");
+        List<String> tropes = Arrays.asList("литота", "метафора", "эпитет", "параллелизм", "аллегория", "ирония", "сравнение", "олицетворение", "гипербола", "перифраза", "оксюморон", "лексический повтор", "синтаксический параллелизм", "инверсия", "пафос", "эвфемизм", "синекдоха", "дисфемизм", "метонимия", "сарказм", "каламбур");
         Elements analise = elements.select("p");
         for (Element element : analise) {
 
             for (String trope : tropes) {
-                if (element.text().toLowerCase(Locale.ROOT).contains(trope)) {
+                if (searchTrope(element.text().toLowerCase(Locale.ROOT), trope)) {
 //                        System.out.println(element.text());
                     System.out.println(trope);
                     Arrays.stream(Stream.of(element.text().split("–")).skip(1)
@@ -122,5 +124,9 @@ public class Parser {
 
         }
         System.out.println(verse.getTropes());
+    }
+
+    private boolean searchTrope(String string, String trope){
+        return string.contains(trope.substring(0, trope.length() - 1));
     }
 }
