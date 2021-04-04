@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class TranslatorToHTML {
 
-    String file;
+    private String file;
 
     public void translate(Verse verse) throws IOException {
         file = verse.getVerse();
