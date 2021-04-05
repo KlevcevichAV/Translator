@@ -20,6 +20,9 @@ public class Translate {
             listVerses = document.select("a.translation.ltr.dict.n");
         }
         if (listVerses.size() == 0) {
+            listVerses = document.select("a.translation.ltr.dict.other");
+        }
+        if (listVerses.size() == 0) {
             return transliterate(text).toLowerCase(Locale.ROOT);
         }
         for (Element element : listVerses) {
