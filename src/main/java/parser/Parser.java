@@ -29,7 +29,6 @@ public class Parser {
     }
 
     private void setInfoFromFirstResource(Verse verse) throws Exception {
-        System.out.println(searchVerseInFirstSource(verse));
         String link = "https://www.culture.ru" + searchVerseInFirstSource(verse);
         setVerse(link, verse);
         setDate(link, verse);
@@ -64,7 +63,6 @@ public class Parser {
         String date = listVerses.text();
         if (!"".equals(date)) {
             verse.setDate(Integer.parseInt(date.substring(0, date.length() - 3)));
-            System.out.println(verse.getDate());
         }
     }
 
@@ -76,7 +74,6 @@ public class Parser {
         elements = document.select("div.kratkiy-analiz");
         setFoot(verse);
         setTropes(verse);
-        System.out.println(verse.getFoot());
     }
 
     private String searchVerseInSecondSource(Verse verse) throws Exception {
@@ -105,25 +102,24 @@ public class Parser {
     }
 
     private void setTropes(Verse verse) {
-        List<String> tropes = Arrays.asList("литота", "метафора", "эпитет", "параллелизм", "аллегория", "ирония", "сравнение", "олицетворение", "гипербола", "перифраза", "оксюморон", "лексический повтор", "синтаксический параллелизм", "инверсия", "пафос", "эвфемизм", "синекдоха", "дисфемизм", "метонимия", "сарказм", "каламбур");
+        List<String> tropes = Arrays.asList("литота", "метафора", "эпитет", "параллелизм", "аллегория", "ирония", "сравнение", "олицетворение", "гипербола", "перифраз", "оксюморон", "лексический повтор", "синтаксический параллелизм", "инверсия", "пафос", "эвфемизм", "синекдоха", "дисфемизм", "метонимия", "сарказм", "каламбур");
+        List<String> tropesEn = Arrays.asList("litotes", "metaphor", "epithet", "parallelism", "allegory", "irony", "simile", "personification", "hyperbole", "circumlocution", "oxymoron", "reiteration", "parallel_structure", "inversion", "pathos", "euphemism", "synecdoche", "dysphemism", "metonymy", "sarcasm", "pun");
         Elements analise = elements.select("p");
         for (Element element : analise) {
 
-            for (String trope : tropes) {
-                if (searchTrope(element.text().toLowerCase(Locale.ROOT), trope)) {
-//                        System.out.println(element.text());
-                    System.out.println(trope);
+            for (int i = 0; i < tropes.size(); i++){
+                if (searchTrope(element.text().toLowerCase(Locale.ROOT), tropes.get(i))) {
+                    int finalI = i;
                     Arrays.stream(Stream.of(element.text().split("–")).skip(1)
                             .flatMap((p) -> Arrays.stream(p.split(","))).toArray(String[]::new))
                             .map(p -> p.replaceAll("\\.", ""))
                             .map(p -> p.replaceAll("”", ""))
                             .map(p -> p.replaceAll(" “", ""))
-                            .forEach(el -> verse.getTropes().put(el, trope));
+                            .forEach(el -> verse.getTropes().put(el, tropesEn.get(finalI)));
                 }
             }
 
         }
-        System.out.println(verse.getTropes());
     }
 
     private boolean searchTrope(String string, String trope){
