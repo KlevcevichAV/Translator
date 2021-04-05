@@ -32,6 +32,7 @@ public class Parser {
         String link = "https://www.culture.ru" + searchVerseInFirstSource(verse);
         setVerse(link, verse);
         setDate(link, verse);
+        setCentury(link, verse);
     }
 
     private String searchVerseInFirstSource(Verse verse) throws Exception {
@@ -65,6 +66,22 @@ public class Parser {
             verse.setDate(Integer.parseInt(date.substring(0, date.length() - 3)));
         }
     }
+
+    private void setCentury(String source, Verse verse) throws IOException {
+        document = Jsoup.connect(source).userAgent("Chrome/4.0.249.0 Safari/532.5").referrer("http://www.google.com").get();
+        Elements listVerses = document.select("aside.js-tags.tags.tags__entity.tags__offset-bottom");
+        for (Element element : listVerses.select("span.button_text")) {
+            if (element.text().equals("Золотой век")) {
+                verse.setCentury(element.text());
+                return;
+            }
+            if (element.text().equals("Серебряный век")) {
+                verse.setCentury(element.text());
+                return;
+            }
+        }
+    }
+
 
     private void setInfoFromSecondResource(Verse verse) throws Exception {
         String source = "https://obrazovaka.ru/analiz-stihotvoreniya";
@@ -107,7 +124,7 @@ public class Parser {
         Elements analise = elements.select("p");
         for (Element element : analise) {
 
-            for (int i = 0; i < tropes.size(); i++){
+            for (int i = 0; i < tropes.size(); i++) {
                 if (searchTrope(element.text().toLowerCase(Locale.ROOT), tropes.get(i))) {
                     int finalI = i;
                     Arrays.stream(Stream.of(element.text().split("–")).skip(1)
@@ -122,7 +139,7 @@ public class Parser {
         }
     }
 
-    private boolean searchTrope(String string, String trope){
+    private boolean searchTrope(String string, String trope) {
         return string.contains(trope.substring(0, trope.length() - 1));
     }
 }

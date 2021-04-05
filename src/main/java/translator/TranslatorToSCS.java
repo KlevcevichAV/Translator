@@ -7,14 +7,16 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class TranslatorToSCS {
     private StringBuilder file;
+    private String mainIdtf;
 
     public void translate(Verse verse) throws IOException {
         String SCAuthor = searchAuthor(verse.getAuthor());
-        String mainIdtf = Translate.translate(verse.getTitle()).replaceAll(" ", "_").toLowerCase(Locale.ROOT);
+        mainIdtf = Translate.translate(verse.getTitle()).replaceAll(" ", "_").toLowerCase(Locale.ROOT);
         file = new StringBuilder();
         setVerseAttribute(mainIdtf, SCAuthor, verse);
         setTextVerse(mainIdtf, verse);
@@ -33,12 +35,14 @@ public class TranslatorToSCS {
         String tempSCAuthor = String.format("person_%S", Translate.translate(author).replaceAll(" ", "_")).toLowerCase(Locale.ROOT);
         String file = readFile();
         int pointer = file.toLowerCase(Locale.ROOT).indexOf(tempSCAuthor);
-
+        if (pointer == -1){
+            throw new IOException("Author not found!");
+        }
         return file.substring(pointer, file.indexOf(";", pointer));
     }
 
     private String readFile() {
-        File file = new File(Config.PATH_AUTHORS);
+        File file = new File(Config.AUTHORS_PATH);
         StringBuilder result = new StringBuilder();
         try (FileReader fr = new FileReader(file)) {
             Scanner scan = new Scanner(fr);
@@ -69,10 +73,12 @@ public class TranslatorToSCS {
     }
 
     private void setFoot(String foot) throws IOException {
+        if (Objects.isNull(foot)) return;
         file.append(String.format("\t=> nrel_foot:\n\t\t%s;\n", Translate.translate(foot)));
     }
 
     private void setYear(int date) {
+        if (date == 0) return;
         file.append(String.format("\t=> nrel_publication_date:\n\t\tyear_%d;;\n\n", date));
     }
 
@@ -85,5 +91,9 @@ public class TranslatorToSCS {
 
     public String getFile() {
         return file.toString();
+    }
+
+    public String getMainIdtf() {
+        return mainIdtf;
     }
 }

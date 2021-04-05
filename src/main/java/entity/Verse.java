@@ -8,6 +8,7 @@ public class Verse {
     private String title;
     private int date;
     private String foot;
+    private String century;
     private HashMap<String, String> tropes;
 
 
@@ -63,6 +64,14 @@ public class Verse {
 
     public void setTropes(HashMap<String, String> tropes) {
         this.tropes = tropes;
+    }
+
+    public String getCentury() {
+        return century;
+    }
+
+    public void setCentury(String century) {
+        this.century = century;
     }
 
     @Override
