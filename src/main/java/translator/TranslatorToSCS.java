@@ -41,7 +41,9 @@ public class TranslatorToSCS {
     }
 
     private String searchAuthor(String author) throws IOException {
-        String tempSCAuthor = String.format("person_%S", Translate.transliterate(author).replaceAll(" ", "_")).toLowerCase(Locale.ROOT);
+        String tempSCAuthor =  Translate.translate("фамилия " + author).replaceAll(" ", "_").toLowerCase(Locale.ROOT);
+        tempSCAuthor = tempSCAuthor.substring(tempSCAuthor.indexOf('_'));
+        tempSCAuthor = "person" + tempSCAuthor;
         String file = readFile();
         int pointer = file.toLowerCase(Locale.ROOT).indexOf(tempSCAuthor);
         if (pointer == -1) {
