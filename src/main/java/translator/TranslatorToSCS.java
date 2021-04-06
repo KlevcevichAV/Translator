@@ -7,9 +7,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
 
 public class TranslatorToSCS {
     private StringBuilder file;
@@ -25,8 +23,11 @@ public class TranslatorToSCS {
     }
 
     private void setMainIdtf(Verse verse) throws IOException {
+        List<String> forbiddenSymbols = Arrays.asList("\\.", ",", "\\?", "!", ":", "'", ";", "\"", "|", "`", "@");
         mainIdtf = Translate.translate(verse.getTitle()).replaceAll(" ", "_").toLowerCase(Locale.ROOT);
-        mainIdtf = mainIdtf.replaceAll("\\.", "").replaceAll(",", "").replaceAll("\\?", "");
+        for (String symbol : forbiddenSymbols) {
+            mainIdtf = mainIdtf.replaceAll(symbol, "");
+        }
         System.out.println(mainIdtf);
     }
 
@@ -41,7 +42,7 @@ public class TranslatorToSCS {
     }
 
     private String searchAuthor(String author) throws IOException {
-        String tempSCAuthor =  Translate.translate("фамилия " + author).replaceAll(" ", "_").toLowerCase(Locale.ROOT);
+        String tempSCAuthor = Translate.translate("фамилия " + author).replaceAll(" ", "_").toLowerCase(Locale.ROOT);
         tempSCAuthor = tempSCAuthor.substring(tempSCAuthor.indexOf('_'));
         tempSCAuthor = "person" + tempSCAuthor;
         String file = readFile();
