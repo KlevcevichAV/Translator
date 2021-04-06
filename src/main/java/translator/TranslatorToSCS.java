@@ -3,6 +3,7 @@ package translator;
 import config.Config;
 import entity.Verse;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -15,27 +16,35 @@ public class TranslatorToSCS {
     private String mainIdtf;
 
     public void translate(Verse verse) throws IOException {
+        setMainIdtf(verse);
         String SCAuthor = searchAuthor(verse.getAuthor());
-        mainIdtf = Translate.translate(verse.getTitle()).replaceAll(" ", "_").toLowerCase(Locale.ROOT);
+        searchVerse(verse);
         file = new StringBuilder();
         setVerseAttribute(mainIdtf, SCAuthor, verse);
         setTextVerse(mainIdtf, verse);
+    }
+
+    private void setMainIdtf(Verse verse) throws IOException {
+        mainIdtf = Translate.translate(verse.getTitle()).replaceAll(" ", "_").toLowerCase(Locale.ROOT);
+        mainIdtf = mainIdtf.replaceAll("\\.", "").replaceAll(",", "").replaceAll("\\?", "");
+        System.out.println(mainIdtf);
     }
 
     private void setVerseAttribute(String mainIdtf, String SCAuthor, Verse verse) throws IOException {
         setMainIdtf(mainIdtf, verse.getTitle());
         setVerse();
         setAuthor(SCAuthor);
+
         setLanguage();
         setFoot(verse.getFoot());
         setYear(verse.getDate());
     }
 
     private String searchAuthor(String author) throws IOException {
-        String tempSCAuthor = String.format("person_%S", Translate.translate(author).replaceAll(" ", "_")).toLowerCase(Locale.ROOT);
+        String tempSCAuthor = String.format("person_%S", Translate.transliterate(author).replaceAll(" ", "_")).toLowerCase(Locale.ROOT);
         String file = readFile();
         int pointer = file.toLowerCase(Locale.ROOT).indexOf(tempSCAuthor);
-        if (pointer == -1){
+        if (pointer == -1) {
             throw new IOException("Author not found!");
         }
         return file.substring(pointer, file.indexOf(";", pointer));
@@ -82,11 +91,41 @@ public class TranslatorToSCS {
         file.append(String.format("\t=> nrel_publication_date:\n\t\tyear_%d;;\n\n", date));
     }
 
+    private void searchVerse(Verse verse) throws IOException {
+        String path = "";
+        try {
+            path = setPath(verse);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+        path = path + "/" + path.substring(path.lastIndexOf("/") + 1) + ".scs";
+        File file = new File(path);
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String line;
+        String title = Translate.translate(verse.getTitle()).toLowerCase(Locale.ROOT).replaceAll(" ", "_");
+        while ((line = br.readLine()) != null) {
+            if (line.equals(String.format("\t\t%s;", title))) {
+                throw new IOException("This verse exists!");
+            }
+        }
+    }
+
     private void setTextVerse(String mainIdtf, Verse verse) {
         file.append(String.format("%s => nrel_text:\n\t.%s", mainIdtf, mainIdtf));
         file.append(String.format("\n\t(*\n\t\t=> nrel_main_idtf:[Текст. \"%s\"] (* <-lang_ru;; *);;\n", verse.getTitle()));
         file.append(String.format("\t\t<= nrel_sc_text_translation:\n\t\t\t...\n\t\t\t(*\n\t\t\t\t -> \"file://content/%s.html\" (* <-lang_ru;; *);;", mainIdtf));
         file.append("\n\t\t\t*);;\n\n\t*);;");
+    }
+
+    private String setPath(Verse verse) throws IOException {
+        if ("Золотой век".equals(verse.getCentury())) {
+            return Config.GOLDEN_AGE_PATH;
+        }
+        if ("Серебряный век".equals(verse.getCentury())) {
+            return Config.SILVER_AGE_PATH;
+        }
+        throw new IOException("Verse doesn't have century");
     }
 
     public String getFile() {
@@ -96,4 +135,5 @@ public class TranslatorToSCS {
     public String getMainIdtf() {
         return mainIdtf;
     }
+
 }

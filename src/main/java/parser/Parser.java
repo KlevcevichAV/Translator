@@ -100,7 +100,7 @@ public class Parser {
                 return element.attr("abs:href");
             }
         }
-        throw new Exception("entity.Verse not found!");
+        throw new Exception("Verse not found in the second recourse!");
     }
 
     private void setFoot(Verse verse) {

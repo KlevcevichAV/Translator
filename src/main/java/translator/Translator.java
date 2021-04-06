@@ -5,6 +5,7 @@ import entity.Verse;
 
 import java.io.*;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class Translator {
@@ -18,28 +19,32 @@ public class Translator {
         translatorToHTML = new TranslatorToHTML();
     }
 
-    public void translate(Verse verse) throws IOException {
-        translatorToSCS.translate(verse);
-        translatorToHTML.translate(verse);
-        String path = setPath(verse);
-        String pathPoetry = path + "/poetry";
-        writeCSCInFile(verse, pathPoetry);
-        writeHTMLInFile(verse, pathPoetry);
-        if (path.contains(Config.GOLDEN_AGE_PATH) || path.contains(Config.SILVER_AGE_PATH)) {
-            addVerseInSectionSCS(path);
+    public void translate(Verse verse) {
+        try {
+            translatorToSCS.translate(verse);
+            translatorToHTML.translate(verse);
+            String path = setPath(verse);
+            String pathPoetry = path + (Objects.nonNull(verse.getCentury()) ? "/poetry" : "");
+            writeCSCInFile(verse, pathPoetry);
+            writeHTMLInFile(verse, pathPoetry);
+            if (path.contains(Config.GOLDEN_AGE_PATH) || path.contains(Config.SILVER_AGE_PATH)) {
+                addVerseInSectionSCS(path);
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
         }
     }
 
     private void writeHTMLInFile(Verse verse, String path) throws IOException {
         new File(path + "/content/").mkdir();
-        try (FileWriter writer = new FileWriter(String.format("%s/content/%s.html", path, convertTitle(verse.getTitle())))) {
+        try (FileWriter writer = new FileWriter(String.format("%s/content/%s.html", path, translatorToSCS.getMainIdtf()))) {
             writer.write(translatorToHTML.getFile());
         }
     }
 
     private void writeCSCInFile(Verse verse, String path) throws IOException {
         new File(path).mkdir();
-        File file = new File(String.format("%s/%s.scs", path, convertTitle(verse.getTitle())));
+        File file = new File(String.format("%s/%s.scs", path, translatorToSCS.getMainIdtf()));
         try (FileWriter writer = new FileWriter(file)) {
             writer.write(translatorToSCS.getFile());
         }
@@ -52,7 +57,7 @@ public class Translator {
         if (SILVER_AGE.equals(verse.getCentury())) {
             return Config.SILVER_AGE_PATH;
         }
-        return String.format("%s/%s", Config.DEFAULT_PATH, convertTitle(verse.getTitle()));
+        return String.format("%s/%s", Config.DEFAULT_PATH, translatorToSCS.getMainIdtf());
     }
 
     private String convertTitle(String title) throws IOException {

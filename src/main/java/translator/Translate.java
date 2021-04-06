@@ -1,34 +1,18 @@
 package translator;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
 
 public class Translate {
 
-    public static String translate(String text) throws IOException {
-        String urlStr = String.format("https://context.reverso.net/translation/russian-english/%s", URLEncoder.encode(text, StandardCharsets.UTF_8));
-        Document document = Jsoup.connect(urlStr).userAgent("Chrome/4.0.249.0 Safari/532.5").referrer("http://www.google.com").get();
-        Elements listVerses = document.select("div.translation.ltr.dict.first.n");
-        if (listVerses.size() == 0) {
-            listVerses = document.select("a.translation.ltr.dict.n");
-        }
-        if (listVerses.size() == 0) {
-            listVerses = document.select("a.translation.ltr.dict.other");
-        }
-        if (listVerses.size() == 0) {
-            return transliterate(text).toLowerCase(Locale.ROOT);
-        }
-        for (Element element : listVerses) {
-            return element.text().toLowerCase(Locale.ROOT);
-        }
-        return "";
+    public static void main(String[] args) throws IOException {
+        String text = "Брожу ли я вдоль улиц шумных...";
+        //Translated text: Hallo Welt!
+        System.out.println("Translated text: " + translate("ru", "en", text));
     }
 
     public static String transliterate(String message) {
@@ -44,5 +28,44 @@ public class Translate {
         }
         return builder.toString();
     }
+
+    static String translate(String text) throws IOException {
+        String langFrom = "ru";
+        String langTo = "en";
+        String urlStr = "https://script.google.com/macros/s/AKfycbzXQ0UVoORYDgNoURu-cCRFlH-HHsAdSDlZNjUE9H1Co54jb3U/exec" +
+                "?q=" + URLEncoder.encode(text, "UTF-8") +
+                "&target=" + langTo +
+                "&source=" + langFrom;
+        URL url = new URL(urlStr);
+        StringBuilder response = new StringBuilder();
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestProperty("User-Agent", "Mozilla/5.0");
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        return response.toString();
+    }
+
+    private static String translate(String langFrom, String langTo, String text) throws IOException {
+        String urlStr = "https://script.google.com/macros/s/AKfycbzXQ0UVoORYDgNoURu-cCRFlH-HHsAdSDlZNjUE9H1Co54jb3U/exec" +
+                "?q=" + URLEncoder.encode(text, "UTF-8") +
+                "&target=" + langTo +
+                "&source=" + langFrom;
+        URL url = new URL(urlStr);
+        StringBuilder response = new StringBuilder();
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestProperty("User-Agent", "Mozilla/5.0");
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        return response.toString();
+    }
+
 }
 
